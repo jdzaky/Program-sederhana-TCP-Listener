@@ -52,9 +52,19 @@ func KirimPesan(pesan string) {
 	}
 	defer serverConn.Close()
 
+	err = serverConn.SetWriteDeadline(time.Now().Add(3 * time.Second))
+	if err != nil {
+		fmt.Println("Error setting write deadline:", err)
+	}
+
 	err = binary.Write(serverConn, binary.LittleEndian, uint32(len(pesan)))
 	if err != nil {
 		panic(err)
+	}
+
+	err = serverConn.SetWriteDeadline(time.Now().Add(3 * time.Second))
+	if err != nil {
+		fmt.Println("Error setting write deadline:", err)
 	}
 
 	_, err = serverConn.Write([]byte(pesan))
@@ -62,10 +72,20 @@ func KirimPesan(pesan string) {
 		panic(err)
 	}
 
+	err = serverConn.SetReadDeadline(time.Now().Add(3 * time.Second))
+	if err != nil {
+		fmt.Println("Error setting read deadline:", err)
+	}
+
 	var size uint32
 	err = binary.Read(serverConn, binary.LittleEndian, &size)
 	if err != nil {
 		panic(err)
+	}
+
+	err = serverConn.SetReadDeadline(time.Now().Add(3 * time.Second))
+	if err != nil {
+		fmt.Println("Error setting read deadline:", err)
 	}
 
 	bytReply := make([]byte, size)
